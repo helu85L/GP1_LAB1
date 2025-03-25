@@ -9,7 +9,12 @@
  */
 // ElectricityBillingApp - Java Swing UI Template
 
+// ElectricityBillingApp - Java Swing UI Template with Menu Bar
+
+// Electricity Billing System with Quantity, Appliance Table & Tiered Rate Calculation
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -18,75 +23,101 @@ class Appliance {
     String name;
     double power;
     double hours;
+    int quantity;
 
-    public Appliance(String name, double power, double hours) {
+    public Appliance(String name, double power, double hours, int quantity) {
         this.name = name;
         this.power = power;
         this.hours = hours;
+        this.quantity = quantity;
     }
 
-    public double getMonthlyBill(double rate) {
-        double dailyEnergy = (power * hours) / 1000.0;
-        double monthlyEnergy = dailyEnergy * 30;
-        return monthlyEnergy * rate;
+    public double getMonthlyConsumption() {
+        return (power * hours * quantity * 30) / 1000.0; // kWh
     }
 }
 
 public class ElectricityBillingApp {
     private JFrame frame;
-    private JTextField nameField, powerField, hoursField;
-    private JTextArea resultArea;
+    private JTextField nameField, powerField, hoursField, quantityField;
+    private JTable applianceTable;
+    private DefaultTableModel tableModel;
+    private JLabel totalConsumptionLabel, totalBillLabel;
     private ArrayList<Appliance> appliances;
-    private final double RATE_PER_KWH = 2.5;
 
     public ElectricityBillingApp() {
         appliances = new ArrayList<>();
         frame = new JFrame("Electricity Billing Calculator");
-        frame.setSize(500, 500);
+        frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        // --- Menu Bar ---
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        JMenu editMenu = new JMenu("Edit");
+        JMenu helpMenu = new JMenu("Help");
+        JMenu utilityMenu = new JMenu("Utility");
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
+        menuBar.add(helpMenu);
+        menuBar.add(utilityMenu);
+        frame.setJMenuBar(menuBar);
+
+        // --- Input Panel ---
         JLabel nameLabel = new JLabel("Appliance Name:");
         JLabel powerLabel = new JLabel("Power (Watts):");
         JLabel hoursLabel = new JLabel("Hours per Day:");
+        JLabel quantityLabel = new JLabel("Quantity:");
 
-        nameField = new JTextField(15);
+        nameField = new JTextField(10);
         powerField = new JTextField(10);
         hoursField = new JTextField(10);
+        quantityField = new JTextField(10);
 
         JButton addButton = new JButton("Add Appliance");
+        JButton removeButton = new JButton("Remove Selected");
         JButton calculateButton = new JButton("Calculate Bill");
+        JButton clearButton = new JButton("Clear All");
 
-        resultArea = new JTextArea(10, 40);
-        resultArea.setEditable(false);
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+        inputPanel.add(nameLabel);
+        inputPanel.add(nameField);
+        inputPanel.add(powerLabel);
+        inputPanel.add(powerField);
+        inputPanel.add(hoursLabel);
+        inputPanel.add(hoursField);
+        inputPanel.add(quantityLabel);
+        inputPanel.add(quantityField);
+        inputPanel.add(addButton);
+        inputPanel.add(removeButton);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(0, 2, 10, 10));
-        panel.add(nameLabel);
-        panel.add(nameField);
-        panel.add(powerLabel);
-        panel.add(powerField);
-        panel.add(hoursLabel);
-        panel.add(hoursField);
-        panel.add(addButton);
-        panel.add(calculateButton);
+        // --- Table for Appliance List ---
+        String[] columnNames = {"Name", "Power (W)", "Hours/Day", "Quantity", "Monthly kWh"};
+        tableModel = new DefaultTableModel(columnNames, 0);
+        applianceTable = new JTable(tableModel);
+        JScrollPane tableScrollPane = new JScrollPane(applianceTable);
 
-        JScrollPane scrollPane = new JScrollPane(resultArea);
+        // --- Output Area ---
+        totalConsumptionLabel = new JLabel("Total Consumption: 0.00 kWh");
+        totalBillLabel = new JLabel("Total Bill: 0.00 ETB");
 
+        JPanel outputPanel = new JPanel(new GridLayout(3, 1));
+        outputPanel.add(totalConsumptionLabel);
+        outputPanel.add(totalBillLabel);
+        outputPanel.add(calculateButton);
+        outputPanel.add(clearButton);
+
+        // --- Main Layout ---
         frame.setLayout(new BorderLayout());
-        frame.add(panel, BorderLayout.NORTH);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(inputPanel, BorderLayout.NORTH);
+        frame.add(tableScrollPane, BorderLayout.CENTER);
+        frame.add(outputPanel, BorderLayout.SOUTH);
 
-        addButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addAppliance();
-            }
-        });
-
-        calculateButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                calculateTotalBill();
-            }
-        });
+        // --- Button Actions ---
+        addButton.addActionListener(e -> addAppliance());
+        removeButton.addActionListener(e -> removeSelectedAppliance());
+        calculateButton.addActionListener(e -> calculateBill());
+        clearButton.addActionListener(e -> clearAll());
 
         frame.setVisible(true);
     }
@@ -96,40 +127,62 @@ public class ElectricityBillingApp {
             String name = nameField.getText().trim();
             double power = Double.parseDouble(powerField.getText().trim());
             double hours = Double.parseDouble(hoursField.getText().trim());
+            int quantity = Integer.parseInt(quantityField.getText().trim());
 
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "Please enter appliance name.");
-                return;
-            }
-            if (power <= 0 || hours < 0 || hours > 24) {
-                JOptionPane.showMessageDialog(frame, "Please enter valid power and hours per day (0-24).");
+            if (name.isEmpty() || power <= 0 || hours < 0 || hours > 24 || quantity <= 0) {
+                JOptionPane.showMessageDialog(frame, "Please enter valid appliance details.");
                 return;
             }
 
-            appliances.add(new Appliance(name, power, hours));
-            JOptionPane.showMessageDialog(frame, "Appliance added successfully!");
+            Appliance app = new Appliance(name, power, hours, quantity);
+            appliances.add(app);
+            tableModel.addRow(new Object[]{name, power, hours, quantity, String.format("%.2f", app.getMonthlyConsumption())});
 
             nameField.setText("");
             powerField.setText("");
             hoursField.setText("");
+            quantityField.setText("");
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(frame, "Please enter numeric values for power and hours.");
+            JOptionPane.showMessageDialog(frame, "Please enter numeric values for power, hours and quantity.");
         }
     }
 
-    private void calculateTotalBill() {
-        double totalBill = 0;
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n--- Appliance Bill Summary ---\n");
+    private void removeSelectedAppliance() {
+        int row = applianceTable.getSelectedRow();
+        if (row >= 0) {
+            appliances.remove(row);
+            tableModel.removeRow(row);
+        } else {
+            JOptionPane.showMessageDialog(frame, "Please select a row to remove.");
+        }
+    }
 
+    private void calculateBill() {
+        double totalConsumption = 0;
         for (Appliance app : appliances) {
-            double bill = app.getMonthlyBill(RATE_PER_KWH);
-            totalBill += bill;
-            sb.append(app.name + " - Monthly Bill: " + String.format("%.2f", bill) + " Birr\n");
+            totalConsumption += app.getMonthlyConsumption();
         }
 
-        sb.append("\nTotal Monthly Bill: " + String.format("%.2f", totalBill) + " Birr\n");
-        resultArea.setText(sb.toString());
+        double totalBill = calculateTieredBill(totalConsumption);
+        totalConsumptionLabel.setText("Total Consumption: " + String.format("%.2f", totalConsumption) + " kWh");
+        totalBillLabel.setText("Total Bill: " + String.format("%.2f", totalBill) + " ETB");
+    }
+
+    private double calculateTieredBill(double consumption) {
+        double bill = 0;
+        if (consumption <= 50) bill = consumption * 0.5;
+        else if (consumption <= 100) bill = 50 * 0.5 + (consumption - 50) * 0.75;
+        else if (consumption <= 200) bill = 50 * 0.5 + 50 * 0.75 + (consumption - 100) * 1.2;
+        else if (consumption <= 300) bill = 50 * 0.5 + 50 * 0.75 + 100 * 1.2 + (consumption - 200) * 1.5;
+        else bill = 50 * 0.5 + 50 * 0.75 + 100 * 1.2 + 100 * 1.5 + (consumption - 300) * 2.0;
+        return bill;
+    }
+
+    private void clearAll() {
+        appliances.clear();
+        tableModel.setRowCount(0);
+        totalConsumptionLabel.setText("Total Consumption: 0.00 kWh");
+        totalBillLabel.setText("Total Bill: 0.00 ETB");
     }
 
     public static void main(String[] args) {
