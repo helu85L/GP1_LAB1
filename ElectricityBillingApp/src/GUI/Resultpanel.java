@@ -1,13 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package GUI;
 
-/**
- *
- * @author HP
- */
-public class Resultpanel {
-    
+import javax.swing.*;
+import java.awt.*;
+
+public class ResultPanel extends JPanel {
+    private JLabel resultLabel;
+
+    public ResultPanel() {
+        setLayout(new BorderLayout());
+        resultLabel = new JLabel("Total Bill: 0.00 ETB", SwingConstants.CENTER);
+        add(resultLabel, BorderLayout.CENTER);
+    }
+
+    public void updateBill(double bill) {
+        resultLabel.setText("Total Bill: " + bill + " ETB");
+    }
 }

@@ -1,13 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Logic;
 
-/**
- *
- * @author HP
- */
 public class Validator {
-    
+    public static boolean isValidNumber(String input) {
+        try {
+            double value = Double.parseDouble(input);
+            return value >= 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }
