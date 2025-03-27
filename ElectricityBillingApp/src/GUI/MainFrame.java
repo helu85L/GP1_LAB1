@@ -1,14 +1,19 @@
-package GUI;
-
 import javax.swing.*;
+import java.awt.*;
 
 public class MainFrame extends JFrame {
     public MainFrame() {
-        setTitle("Electricity Billing System");
-        setSize(400, 300);
+        setTitle("Electricity Billing App");
+        setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        add(new InputPanel());
+        InputPanel inputPanel = new InputPanel();
+        ResultPanel resultPanel = new ResultPanel();
+
+        add(inputPanel, BorderLayout.NORTH);
+        add(resultPanel, BorderLayout.CENTER);
+
+        setVisible(true);
     }
 }

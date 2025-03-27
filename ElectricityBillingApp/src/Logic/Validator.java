@@ -1,10 +1,8 @@
-package Logic;
-
 public class Validator {
-    public static boolean isValidNumber(String input) {
+    public static boolean isValidNumber(String text) {
         try {
-            double value = Double.parseDouble(input);
-            return value >= 0;
+            Double.parseDouble(text);
+            return true;
         } catch (NumberFormatException e) {
             return false;
         }
