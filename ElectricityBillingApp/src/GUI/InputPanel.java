@@ -13,14 +13,14 @@ public class InputPanel extends JPanel {
     private JRadioButton dayRadioButton, monthRadioButton;
     private ButtonGroup usageGroup;
 
-    private double totalConsumption = 0; // Variable to keep track of total consumption
+    private double totalConsumption = 0;
 
     public InputPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        // Input Box - Appliance, Wattage, Usage, Quantity
+        
         JPanel inputBox = new JPanel();
-        inputBox.setLayout(new GridLayout(7, 2));  // Adjusted grid layout to accommodate new field
+        inputBox.setLayout(new GridLayout(7, 2));  
         inputBox.setBorder(BorderFactory.createTitledBorder("Enter Appliance Details"));
 
         inputBox.add(new JLabel("Appliance:"));
@@ -58,7 +58,7 @@ public class InputPanel extends JPanel {
         addButtonBox.add(addButton);
         add(addButtonBox);
 
-        // Table Box - Displays appliance list
+        
         JPanel tableBox = new JPanel();
         tableBox.setLayout(new BorderLayout());
         tableBox.setBorder(BorderFactory.createTitledBorder("Appliance List"));
@@ -92,7 +92,7 @@ public class InputPanel extends JPanel {
 
         add(resultBox);
 
-        // Button Actions
+     
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -109,40 +109,71 @@ public class InputPanel extends JPanel {
     }
 
     private void addApplianceToTable() {
-        String name = applianceField.getText();
-        int wattage = Integer.parseInt(wattageField.getText());
-        int quantity = Integer.parseInt(quantityField.getText());
-        int time = Integer.parseInt(timeField.getText());
+        try {
+            String name = applianceField.getText().trim();
+            String wattageText = wattageField.getText().trim();
+            String timeText = timeField.getText().trim();
+            String quantityText = quantityField.getText().trim();
 
-        // Adjust usage based on whether it's "Day" or "Month"
-        boolean isDay = dayRadioButton.isSelected();
-        String usageType = isDay ? "Day" : "Month";
-        int usage = isDay ? time * 1 : time * 30;  // Convert to daily or monthly usage (assuming 30 days in a month)
+         
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Appliance name cannot be empty!", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (wattageText.isEmpty() || timeText.isEmpty() || quantityText.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill all fields!", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        double consumption = calculateConsumption(wattage, usage, quantity, usageType);
-        tableModel.addRow(new Object[]{name, wattage, usageType, quantity, time, consumption});
+           
+            int wattage = Integer.parseInt(wattageText);
+            int time = Integer.parseInt(timeText);
+            int quantity = Integer.parseInt(quantityText);
 
-        // Update total consumption
-        totalConsumption += consumption;
+           
+            if (wattage <= 0 || time <= 0 || quantity <= 0) {
+                JOptionPane.showMessageDialog(this, "Wattage, Usage Time, and Quantity must be positive numbers!", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        // Clear input fields
-        applianceField.setText("");
-        wattageField.setText("");
-        timeField.setText("");
-        quantityField.setText("");
+           
+            boolean isDay = dayRadioButton.isSelected();
+            String usageType = isDay ? "Day" : "Month";
+
+            
+            int adjustedUsage = isDay ? (time * 30) : time;  
+
+     
+            double consumption = Calculator.calculateConsumption(wattage, adjustedUsage, quantity);
+
+         
+            tableModel.addRow(new Object[]{name, wattage, time, usageType, quantity, consumption});
+
+           
+            totalConsumption += consumption;
+
+           
+            applianceField.setText("");
+            wattageField.setText("");
+            timeField.setText("");
+            quantityField.setText("");
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numeric values for Wattage, Usage, and Quantity.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void calculateBill() {
-        // Calculate amount (ETB) based on total consumption (kWh/month)
+        
         double amount = Calculator.calculateBillAmount(totalConsumption);
 
-        // Calculate service charge (ETB)
+       
         double serviceCharge = Calculator.calculateServiceCharge(amount);
 
-        // Calculate total billable amount (ETB)
+       
         double totalBillableAmount = Calculator.calculateTotalBill(amount, serviceCharge);
 
-        // Display the results without cursor
+       
         resultArea.setText(String.format("Total Consumption: %.2f kWh/month\n", totalConsumption));
         resultArea.append(String.format("Amount: %.2f ETB\n", amount));
         resultArea.append(String.format("Service Charge: %.2f ETB\n", serviceCharge));
