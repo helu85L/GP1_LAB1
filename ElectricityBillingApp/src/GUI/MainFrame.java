@@ -2,9 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 public class MainFrame extends JFrame {
-    private JPanel mainPanel; // Main menu panel
     private JPanel currentPanel; // The panel currently displayed
 
     public MainFrame() {
@@ -25,44 +25,45 @@ public class MainFrame extends JFrame {
         JMenu helpMenu = new JMenu("Help");
         menuBar.add(helpMenu);
 
-        // Create Menu Items
+        // Create Menu Items with Keyboard Shortcuts
         JMenuItem electricityMenuItem = new JMenuItem("Electricity");
+        electricityMenuItem.setMnemonic(KeyEvent.VK_E);
+        electricityMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
+        
         JMenuItem waterMenuItem = new JMenuItem("Water");
+        waterMenuItem.setMnemonic(KeyEvent.VK_W);
+        waterMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
+        
         JMenuItem internetMenuItem = new JMenuItem("Internet");
+        internetMenuItem.setMnemonic(KeyEvent.VK_I);
+        internetMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.CTRL_MASK));
 
         // Add Menu Items to "Utility"
         utilityMenu.add(electricityMenuItem);
         utilityMenu.add(waterMenuItem);
         utilityMenu.add(internetMenuItem);
 
-        // Create the main menu panel
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new FlowLayout());
+        // Create the initial blank panel
+        JPanel mainMenuPanel = new JPanel();
+        mainMenuPanel.setLayout(new FlowLayout());
         JLabel label = new JLabel("Welcome to the Utility Calculator! Please choose an option from the menu.");
-        mainPanel.add(label);
-        
-        // Set the initial panel
-        currentPanel = mainPanel;
+        mainMenuPanel.add(label);
+
+        // Set the initial screen
+        currentPanel = mainMenuPanel;
         add(currentPanel, BorderLayout.CENTER);
-
+        
         // Action Listeners for Menu Items
-        electricityMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                switchPanel(new InputPanel());  // Show Electricity Calculator
-            }
+        electricityMenuItem.addActionListener((ActionEvent e) -> {
+            switchPanel(new InputPanel());  // Show Electricity Calculator
         });
 
-        // Placeholder actions for Water and Internet
-        waterMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Water Calculator Coming Soon!");
-            }
+        waterMenuItem.addActionListener((ActionEvent e) -> {
+            JOptionPane.showMessageDialog(null, "Water Calculator Coming Soon!");
         });
 
-        internetMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Internet Calculator Coming Soon!");
-            }
+        internetMenuItem.addActionListener((ActionEvent e) -> {
+            JOptionPane.showMessageDialog(null, "Internet Calculator Coming Soon!");
         });
 
         setVisible(true);
