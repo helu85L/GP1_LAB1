@@ -1,0 +1,4 @@
+com\mycompany\electricbillingweb\BillingServlet.class
+com\mycompany\electricbillingweb\JakartaRestConfiguration.class
+com\mycompany\electricbillingweb\logic\Calculator.class
+com\mycompany\electricbillingweb\resources\JakartaEE11Resource.class
